@@ -125,5 +125,5 @@ insectAI-API/
 ## Author
 
 **Salami Tunde Onileola** — Agriculture (Crop Protection) | Backend Developer
-
-Original repo: [Onileola14/insectAI-API](https://github.com/Onileola14/insectAI-API)
+git repo : https://github.com/Onileola14/insectA-AI.git
+live-url : https://insecta-ai.pxxl.click/
