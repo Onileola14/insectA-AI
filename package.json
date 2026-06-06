@@ -1,0 +1,21 @@
+{
+  "name": "insectai-api",
+  "version": "2.0.0",
+  "description": "Free AI insect identification API with web frontend",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "cloudinary": "^2.9.0",
+    "dotenv": "^17.2.4",
+    "express": "^4.22.1",
+    "express-async-errors": "^3.1.1",
+    "express-fileupload": "^1.5.2",
+    "http-status-codes": "^2.3.0",
+    "mongoose": "^9.1.6"
+  }
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insect AI — Identify Pests</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-pattern" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon" aria-hidden="true">🐞</span>
+        <span class="logo-text">Insect<span class="logo-accent">AI</span></span>
+      </div>
+      <p class="tagline">Upload a photo. Get pest ID and control advice.</p>
+    </header>
+
+    <main class="main">
+      <section class="upload-card" id="upload-section">
+        <div
+          class="dropzone"
+          id="dropzone"
+          tabindex="0"
+          role="button"
+          aria-label="Upload insect image"
+        >
+          <input
+            type="file"
+            id="file-input"
+            accept="image/*"
+            capture="environment"
+            hidden
+          />
+          <div class="dropzone-empty" id="dropzone-empty">
+            <div class="dropzone-icon">📷</div>
+            <p class="dropzone-title">Drop an image here</p>
+            <p class="dropzone-hint">or click to browse · JPG, PNG, WebP</p>
+          </div>
+          <img class="preview-img hidden" id="preview-img" alt="Preview" />
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="identify-btn" disabled>
+            Identify insect
+          </button>
+          <button type="button" class="btn btn-ghost hidden" id="clear-btn">
+            Clear
+          </button>
+        </div>
+
+        <div class="status hidden" id="status" role="status"></div>
+      </section>
+
+      <section class="results hidden" id="results" aria-live="polite">
+        <h2 class="results-title">Identification</h2>
+
+        <article class="result-hero">
+          <div class="result-image-wrap">
+            <img id="result-image" class="result-image" alt="Uploaded insect" />
+          </div>
+          <div class="result-names">
+            <h3 id="result-name" class="result-name">—</h3>
+            <p id="result-scientific" class="result-scientific"></p>
+            <span id="result-source" class="badge"></span>
+          </div>
+        </article>
+
+        <div id="result-note" class="note hidden"></div>
+
+        <div id="details-grid" class="details-grid hidden">
+          <div class="detail-card" id="card-affects">
+            <h4>Affects</h4>
+            <ul id="list-affects"></ul>
+          </div>
+          <div class="detail-card" id="card-hosts">
+            <h4>Host plants</h4>
+            <ul id="list-hosts"></ul>
+          </div>
+          <div class="detail-card full" id="card-symptoms">
+            <h4>Symptoms</h4>
+            <ul id="list-symptoms"></ul>
+          </div>
+          <div class="detail-card" id="card-organic">
+            <h4>Organic control</h4>
+            <ul id="list-organic"></ul>
+          </div>
+          <div class="detail-card" id="card-chemical">
+            <h4>Chemical control</h4>
+            <ul id="list-chemical"></ul>
+          </div>
+          <div class="detail-card full" id="card-description">
+            <h4>Description</h4>
+            <p id="text-description"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+       🐞 Insect Identifier | Powered by Google Gemini AI | Agricultural Data from MongoDB | Developed by Salami Tunde Onileola.
+      </p>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
