@@ -1,4 +1,8 @@
 const API_URL = "/api/v1/insect/upload";
+const MAX_DIMENSION = 1280;
+const JPEG_QUALITY = 0.82;
+const MAX_BYTES = 1024 * 1024;
+const SKIP_COMPRESS_BELOW = 500 * 1024;
 
 const $ = (id) => document.getElementById(id);
 
@@ -21,6 +25,71 @@ const showStatus = (text, type = "loading") => {
 };
 
 const hideStatus = () => statusEl.classList.add("hidden");
+
+const loadImageSource = async (file) => {
+  if (typeof createImageBitmap === "function") {
+    const bitmap = await createImageBitmap(file);
+    return { source: bitmap, cleanup: () => bitmap.close?.() };
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not load image"));
+    image.src = url;
+  });
+
+  return {
+    source: img,
+    cleanup: () => URL.revokeObjectURL(url),
+  };
+};
+
+const compressImage = async (file) => {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please select an image file");
+  }
+
+  if (file.size <= SKIP_COMPRESS_BELOW) {
+    return file;
+  }
+
+  const { source, cleanup } = await loadImageSource(file);
+  const srcWidth = source.width;
+  const srcHeight = source.height;
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(srcWidth, srcHeight));
+  const width = Math.round(srcWidth * scale);
+  const height = Math.round(srcHeight * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext("2d").drawImage(source, 0, 0, width, height);
+  cleanup();
+
+  let quality = JPEG_QUALITY;
+  let blob = await new Promise((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", quality),
+  );
+
+  while (blob && blob.size > MAX_BYTES && quality > 0.5) {
+    quality -= 0.1;
+    blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+  }
+
+  canvas.width = 0;
+  canvas.height = 0;
+
+  if (!blob) {
+    throw new Error("Could not process image");
+  }
+
+  const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+  return new File([blob], name, { type: "image/jpeg" });
+};
 
 const setPreview = (file) => {
   if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -47,6 +116,21 @@ const clearPreview = () => {
   fileInput.value = "";
   resultsEl.classList.add("hidden");
   hideStatus();
+};
+
+const handleFile = async (file) => {
+  if (!file?.type.startsWith("image/")) return;
+
+  identifyBtn.disabled = true;
+  showStatus("Preparing image…", "loading");
+
+  try {
+    const compressed = await compressImage(file);
+    setPreview(compressed);
+  } catch (err) {
+    showStatus(err.message || "Could not process image", "error");
+    identifyBtn.disabled = true;
+  }
 };
 
 const renderList = (el, items) => {
@@ -123,7 +207,7 @@ dropzone.addEventListener("keydown", (e) => {
 
 fileInput.addEventListener("change", () => {
   const file = fileInput.files?.[0];
-  if (file) setPreview(file);
+  if (file) handleFile(file);
 });
 
 dropzone.addEventListener("dragover", (e) => {
@@ -139,7 +223,7 @@ dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropzone.classList.remove("dragover");
   const file = e.dataTransfer.files?.[0];
-  if (file?.type.startsWith("image/")) setPreview(file);
+  if (file) handleFile(file);
 });
 
 clearBtn.addEventListener("click", clearPreview);
