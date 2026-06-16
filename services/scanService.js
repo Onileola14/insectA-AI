@@ -18,4 +18,9 @@ const getScanById = async (id) => {
   return await Scan.findById(id).populate("insect");
 };
 
-module.exports = { saveScan, listScans, getScanById };
+const deleteScanById = async (id) => {
+  if (!process.env.MONGO_URI) return null;
+  return await Scan.findByIdAndDelete(id);
+};
+
+module.exports = { saveScan, listScans, getScanById, deleteScanById };

@@ -24,6 +24,9 @@
       <section class="results">
         <h2 class="results-title">Recent Scans</h2>
         <p class="dropzone-hint">Click any scan to view full saved response.</p>
+        <div class="actions">
+          <input id="history-search" class="input" placeholder="Search insect or crop..." />
+        </div>
         <div id="history-list" class="details-grid"></div>
       </section>
       <section class="results hidden" id="history-response">
@@ -52,6 +55,7 @@
           </div>
           <div class="actions">
             <a class="btn btn-ghost" id="resp-report-link">Download report</a>
+            <button class="btn btn-ghost" id="resp-delete-btn" type="button">Delete scan</button>
           </div>
         </div>
       </section>

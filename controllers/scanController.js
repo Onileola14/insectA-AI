@@ -1,4 +1,4 @@
-const { listScans, getScanById } = require("../services/scanService");
+const { listScans, getScanById, deleteScanById } = require("../services/scanService");
 const { calculateTreatment } = require("../services/treatmentCalculatorService");
 
 const getHistory = async (req, res) => {
@@ -50,4 +50,10 @@ const getTreatment = async (req, res) => {
   res.json(result);
 };
 
-module.exports = { getHistory, getReport, getTreatment };
+const deleteScan = async (req, res) => {
+  const deleted = await deleteScanById(req.params.id);
+  if (!deleted) return res.status(404).json({ message: "Scan not found" });
+  res.json({ message: "Scan deleted" });
+};
+
+module.exports = { getHistory, getReport, getTreatment, deleteScan };
