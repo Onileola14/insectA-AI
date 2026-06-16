@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insect AI — Scan History</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-pattern" aria-hidden="true"></div>
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon" aria-hidden="true">🐞</span>
+        <span class="logo-text">Insect<span class="logo-accent">AI</span></span>
+      </div>
+      <p class="tagline">Recent image identifications and saved records.</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="/">Scan</a>
+        <a class="btn btn-ghost" href="/history.html">Scan History</a>
+        <a class="btn btn-ghost" href="/treatment.html">Treatment Calculator</a>
+      </div>
+    </header>
+    <main class="main">
+      <section class="results">
+        <h2 class="results-title">Recent Scans</h2>
+        <div id="history-list" class="details-grid"></div>
+      </section>
+    </main>
+    <script src="/history.js"></script>
+  </body>
+</html>

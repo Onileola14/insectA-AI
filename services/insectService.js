@@ -95,9 +95,14 @@ const getOrCreateInsectDetails = async (aiResult) => {
   return { insect, created: true };
 };
 
-const listInsects = async () => {
+const listInsects = async ({ crop } = {}) => {
   if (!process.env.MONGO_URI) return [];
-  return await Insect.find({}).sort({ name: 1 }).select("-__v");
+  const query = crop
+    ? {
+        host_plants: { $regex: new RegExp(crop, "i") },
+      }
+    : {};
+  return await Insect.find(query).sort({ name: 1 }).select("-__v");
 };
 
 module.exports = {

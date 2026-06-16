@@ -8,15 +8,23 @@ const $ = (id) => document.getElementById(id);
 
 const dropzone = $("dropzone");
 const fileInput = $("file-input");
+const cropInput = $("crop-input");
 const previewImg = $("preview-img");
 const dropzoneEmpty = $("dropzone-empty");
 const identifyBtn = $("identify-btn");
 const clearBtn = $("clear-btn");
 const statusEl = $("status");
 const resultsEl = $("results");
+const shareBtn = $("share-btn");
+const downloadReportBtn = $("download-report-btn");
+const seasonalAlertsEl = $("seasonal-alerts");
+const predictionsCard = $("predictions-card");
+const predictionsList = $("list-predictions");
 
 let selectedFile = null;
 let previewUrl = null;
+let latestReportText = "";
+let latestScanId = null;
 
 const showStatus = (text, type = "loading") => {
   statusEl.textContent = text;
@@ -114,7 +122,35 @@ const clearPreview = () => {
   identifyBtn.disabled = true;
   clearBtn.classList.add("hidden");
   fileInput.value = "";
+  cropInput.value = "";
   resultsEl.classList.add("hidden");
+  $("result-image").src = "";
+  $("result-name").textContent = "—";
+  $("result-scientific").textContent = "";
+  $("result-source").textContent = "";
+  $("result-confidence").textContent = "";
+  $("result-note").textContent = "";
+  $("result-note").classList.add("hidden");
+  seasonalAlertsEl.textContent = "";
+  seasonalAlertsEl.classList.add("hidden");
+  predictionsList.innerHTML = "";
+  predictionsCard.classList.add("hidden");
+  $("list-affects").innerHTML = "";
+  $("list-hosts").innerHTML = "";
+  $("list-symptoms").innerHTML = "";
+  $("list-organic").innerHTML = "";
+  $("list-chemical").innerHTML = "";
+  $("text-description").textContent = "";
+  showCard("card-affects", false);
+  showCard("card-hosts", false);
+  showCard("card-symptoms", false);
+  showCard("card-organic", false);
+  showCard("card-chemical", false);
+  showCard("card-description", false);
+  downloadReportBtn.classList.add("hidden");
+  shareBtn.classList.add("hidden");
+  latestScanId = null;
+  latestReportText = "";
   hideStatus();
 };
 
@@ -151,7 +187,7 @@ const showCard = (cardId, hasContent) => {
 };
 
 const showResults = (data, localPreview) => {
-  const { identified_as: ai, details, note } = data;
+  const { identified_as: ai, details, note, seasonal_alerts, predictions, scan_id } = data;
 
   $("result-image").src = data.image || localPreview;
   $("result-name").textContent = ai?.name || "Unknown";
@@ -161,6 +197,15 @@ const showResults = (data, localPreview) => {
   $("result-source").textContent = ai?.source
     ? `via ${ai.source}`
     : "AI identification";
+  $("result-confidence").textContent =
+    ai?.confidence != null ? `Confidence: ${Number(ai.confidence).toFixed(1)}%` : "";
+  latestScanId = scan_id || null;
+
+  if (latestScanId) {
+    downloadReportBtn.href = `/api/v1/insect/report/${latestScanId}`;
+    downloadReportBtn.classList.remove("hidden");
+    shareBtn.classList.remove("hidden");
+  }
 
   const noteEl = $("result-note");
   if (note) {
@@ -168,6 +213,25 @@ const showResults = (data, localPreview) => {
     noteEl.classList.remove("hidden");
   } else {
     noteEl.classList.add("hidden");
+  }
+
+  if (seasonal_alerts?.length) {
+    seasonalAlertsEl.textContent = `Seasonal alerts: ${seasonal_alerts.join(" | ")}`;
+    seasonalAlertsEl.classList.remove("hidden");
+  } else {
+    seasonalAlertsEl.classList.add("hidden");
+  }
+
+  predictionsList.innerHTML = "";
+  if (predictions?.length) {
+    predictions.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name} (${item.scientific_name || "N/A"}) - ${Number(item.confidence || 0).toFixed(1)}%`;
+      predictionsList.appendChild(li);
+    });
+    predictionsCard.classList.remove("hidden");
+  } else {
+    predictionsCard.classList.add("hidden");
   }
 
   const grid = $("details-grid");
@@ -236,6 +300,7 @@ identifyBtn.addEventListener("click", async () => {
 
   const form = new FormData();
   form.append("image", selectedFile);
+  if (cropInput.value.trim()) form.append("crop", cropInput.value.trim());
 
   try {
     const res = await fetch(API_URL, { method: "POST", body: form });
@@ -253,3 +318,26 @@ identifyBtn.addEventListener("click", async () => {
     identifyBtn.disabled = false;
   }
 });
+
+shareBtn.addEventListener("click", async () => {
+  if (!latestScanId) return;
+  try {
+    const res = await fetch(`/api/v1/insect/report/${latestScanId}`);
+    latestReportText = await res.text();
+    if (navigator.share) {
+      await navigator.share({
+        title: "Insect AI Report",
+        text: latestReportText,
+      });
+    } else {
+      await navigator.clipboard.writeText(latestReportText);
+      showStatus("Report copied to clipboard", "loading");
+    }
+  } catch (err) {
+    showStatus("Unable to share report", "error");
+  }
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js").catch(() => null);
+}

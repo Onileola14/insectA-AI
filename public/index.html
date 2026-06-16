@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -21,6 +22,11 @@
         <span class="logo-text">Insect<span class="logo-accent">AI</span></span>
       </div>
       <p class="tagline">Upload a photo. Get pest ID and control advice.</p>
+      <div class="actions">
+        <a class="btn btn-ghost" href="/">Scan</a>
+        <a class="btn btn-ghost" href="/history.html">Scan History</a>
+        <a class="btn btn-ghost" href="/treatment.html">Treatment Calculator</a>
+      </div>
     </header>
 
     <main class="main">
@@ -47,6 +53,9 @@
           <img class="preview-img hidden" id="preview-img" alt="Preview" />
         </div>
 
+        <label for="crop-input" class="dropzone-hint">Crop (optional)</label>
+        <input id="crop-input" class="input" placeholder="e.g. maize, tomato, cassava" />
+
         <div class="actions">
           <button type="button" class="btn btn-primary" id="identify-btn" disabled>
             Identify insect
@@ -70,10 +79,16 @@
             <h3 id="result-name" class="result-name">—</h3>
             <p id="result-scientific" class="result-scientific"></p>
             <span id="result-source" class="badge"></span>
+            <p id="result-confidence" class="dropzone-hint"></p>
           </div>
         </article>
 
         <div id="result-note" class="note hidden"></div>
+        <div id="seasonal-alerts" class="note hidden"></div>
+        <div id="predictions-card" class="detail-card hidden">
+          <h4>Top Predictions</h4>
+          <ul id="list-predictions"></ul>
+        </div>
 
         <div id="details-grid" class="details-grid hidden">
           <div class="detail-card" id="card-affects">
@@ -101,7 +116,12 @@
             <p id="text-description"></p>
           </div>
         </div>
+        <div class="actions">
+          <button class="btn btn-ghost hidden" id="share-btn" type="button">Share report</button>
+          <a class="btn btn-ghost hidden" id="download-report-btn">Download report</a>
+        </div>
       </section>
+
     </main>
 
     <footer class="footer">

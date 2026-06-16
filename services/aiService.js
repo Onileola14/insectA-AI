@@ -5,10 +5,16 @@ const path = require("path");
 const IDENTIFY_PROMPT = `You are an entomologist. Identify the insect in this image.
 Return ONLY valid JSON with no markdown:
 {
-  "name": "common name",
-  "scientific_name": "Latin name"
+  "name": "best common name",
+  "scientific_name": "best Latin name or empty string",
+  "confidence": 0-100,
+  "predictions": [
+    {"name":"option 1","scientific_name":"latin or empty","confidence":0-100},
+    {"name":"option 2","scientific_name":"latin or empty","confidence":0-100},
+    {"name":"option 3","scientific_name":"latin or empty","confidence":0-100}
+  ]
 }
-If unsure, use your best guess for the common name and leave scientific_name empty.`;
+If unsure, still provide best guesses with lower confidence.`;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -17,6 +23,32 @@ const parseJsonFromText = (text) => {
   const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("AI did not return valid JSON");
   return JSON.parse(match[0]);
+};
+
+const normalizePredictions = (parsed) => {
+  const predictions = Array.isArray(parsed.predictions) ? parsed.predictions : [];
+  const normalized = predictions
+    .map((p) => ({
+      name: p?.name || "",
+      scientific_name: p?.scientific_name || "",
+      confidence: Number(p?.confidence) || 0,
+    }))
+    .filter((p) => p.name)
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, 3);
+
+  const top = normalized[0] || {
+    name: parsed.name || "",
+    scientific_name: parsed.scientific_name || "",
+    confidence: Number(parsed.confidence) || 0,
+  };
+
+  return {
+    name: parsed.name || top.name || "Unknown",
+    scientific_name: parsed.scientific_name || top.scientific_name || "",
+    confidence: Number(parsed.confidence) || top.confidence || 0,
+    predictions: normalized.length ? normalized : [top],
+  };
 };
 
 const MIME_BY_EXT = {
@@ -138,7 +170,11 @@ const identifyWithGemini = async (imageSource) => {
 
       const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new Error("Empty response from Gemini");
-      return { ...parseJsonFromText(text), source: "gemini", model: trimmed };
+      return {
+        ...normalizePredictions(parseJsonFromText(text)),
+        source: "gemini",
+        model: trimmed,
+      };
     } catch (err) {
       lastError = err;
       if (err.response?.status !== 429) break;
@@ -198,7 +234,11 @@ const identifyWithGroq = async (imageSource) => {
 
       const text = response.data?.choices?.[0]?.message?.content;
       if (!text) throw new Error("Empty response from Groq");
-      return { ...parseJsonFromText(text), source: "groq", model: trimmed };
+      return {
+        ...normalizePredictions(parseJsonFromText(text)),
+        source: "groq",
+        model: trimmed,
+      };
     } catch (err) {
       lastError = err;
     }
@@ -249,7 +289,7 @@ const identifyWithHuggingFace = async (imageSource) => {
   const text = response.data?.choices?.[0]?.message?.content;
   if (!text) throw new Error("Empty response from Hugging Face");
   return {
-    ...parseJsonFromText(text),
+    ...normalizePredictions(parseJsonFromText(text)),
     source: "huggingface",
     model,
   };
