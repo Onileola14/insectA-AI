@@ -207,6 +207,20 @@ body {
   padding: 0.9rem;
 }
 
+.history-item-clickable {
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.history-item-clickable:hover {
+  border-color: var(--accent-dim);
+}
+
+.history-item-active {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .status {
   margin-top: 1rem;
   padding: 0.75rem 1rem;

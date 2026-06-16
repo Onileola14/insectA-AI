@@ -23,7 +23,37 @@
     <main class="main">
       <section class="results">
         <h2 class="results-title">Recent Scans</h2>
+        <p class="dropzone-hint">Click any scan to view full saved response.</p>
         <div id="history-list" class="details-grid"></div>
+      </section>
+      <section class="results hidden" id="history-response">
+        <h2 class="results-title">Saved Response</h2>
+        <div class="detail-card">
+          <p><strong id="resp-name">-</strong></p>
+          <p class="dropzone-hint" id="resp-meta"></p>
+          <p class="dropzone-hint" id="resp-crop"></p>
+          <p class="dropzone-hint" id="resp-source"></p>
+          <p class="dropzone-hint" id="resp-alerts"></p>
+          <div>
+            <h4>Top Predictions</h4>
+            <ul id="resp-predictions"></ul>
+          </div>
+          <div>
+            <h4>Symptoms</h4>
+            <ul id="resp-symptoms"></ul>
+          </div>
+          <div>
+            <h4>Organic Control</h4>
+            <ul id="resp-organic"></ul>
+          </div>
+          <div>
+            <h4>Chemical Control</h4>
+            <ul id="resp-chemical"></ul>
+          </div>
+          <div class="actions">
+            <a class="btn btn-ghost" id="resp-report-link">Download report</a>
+          </div>
+        </div>
       </section>
     </main>
     <script src="/history.js"></script>
